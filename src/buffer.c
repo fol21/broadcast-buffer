@@ -93,5 +93,5 @@ int consome (tbuffer* buffer, int meuid)
 void finalizabuffer (tbuffer* buffer)
 {
     sem_destroy(&(buffer->mutex));
-    buffer = NULL;
+    free(buffer);
 }
