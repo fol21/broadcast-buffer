@@ -10,7 +10,7 @@
 #include <queue.h>
   
 typedef struct deposita_args { tbuffer* buffer; int item; int insertions;} deposita_args;
-typedef struct consome_args { tbuffer* buffer; int id;} consome_args;
+typedef struct consome_args { tbuffer* buffer; int id; int consome} consome_args;
 
 void* deposita_thread(void* arg)
 {
@@ -49,7 +49,7 @@ void* consome_thread(void* arg)
 
     consome_args* args= (consome_args*) arg;
     
-    int count = 5;
+    int count = args->consome;
     int data[100];
     int nxt = 0;
     for (int i = 0; i < 100; i++){ data[i] = -1;}
@@ -102,11 +102,8 @@ int main(int argc, char *argv[])
     pthread_t* prod_thds = (pthread_t*)malloc(sizeof(pthread_t) * P); 
     pthread_t* cons_thds = (pthread_t*)malloc(sizeof(pthread_t) * C); 
     tbuffer* buffer = iniciabuffer(N, P, C);
-    // int start[] = {18, 2, 3 , 4 , 5};
-    // tbuffer* buffer = iniciabuffer_pre(N, P, C, NELEMS(start), start);
     
     //Deposita
-
     deposita_args* d_arg = (deposita_args *) malloc(sizeof(deposita_args) * P);
     for (int i = 0; i < P; i++)
     {
@@ -124,6 +121,7 @@ int main(int argc, char *argv[])
         //Consome
         c_arg[i].buffer = buffer;
         c_arg[i].id = i;
+        c_arg[i].consome = P * I;
         pthread_create(&(cons_thds[i]), NULL, consome_thread, &c_arg[i]);
     }
 

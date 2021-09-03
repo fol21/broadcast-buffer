@@ -9,7 +9,7 @@
 #include <buffer.h>
 #include <queue.h>
   
-typedef struct consome_args { tbuffer* buffer; int id;} consome_args;
+typedef struct consome_args { tbuffer* buffer; int id; int consome} consome_args;
 
 void* consome_thread(void* arg)
 {
@@ -17,7 +17,7 @@ void* consome_thread(void* arg)
 
     consome_args* args= (consome_args*) arg;
     
-    int count = 5;
+    int count = args->consome;
     int data[100];
     int nxt = 0;
     for (int i = 0; i < 100; i++){ data[i] = -1;}
@@ -77,6 +77,7 @@ int main(int argc, char *argv[])
         //Consome
         c_arg[i].buffer = buffer;
         c_arg[i].id = i;
+        c_arg[i].consome = P * I;
         pthread_create(&(cons_thds[i]), NULL, consome_thread, &c_arg[i]);
     }
 

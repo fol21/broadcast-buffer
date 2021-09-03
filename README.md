@@ -1,4 +1,8 @@
-# Executando o Programa
+
+# Broadcast entre threads usando um buffer compartilhado
+
+
+## Executando o Programa
 
 Basta executar um dos comandos
 ```bash
@@ -12,7 +16,7 @@ Ex:
 make inicializa.test PARAMS="16 2 2 4"
 ```
 
-# Compilando o Programa
+## Compilando o Programa
 
 *** Antes de começar, verifique se make e gcc estão instalados ***
 
@@ -20,3 +24,12 @@ Execute o comando
 ```bash
 make tarefa1
 ```
+
+## Testes
+
+Descrição dos testes realizados, problemas identificados e não resolvidos. 
+
+[Relatorio dos Testes](./docs/relatorio.md)
+
+````
+
