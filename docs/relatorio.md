@@ -120,9 +120,9 @@ Para reproduzir o teste utilize o comando:
 make inicializa.test PARAMS="16 2 2 4"
 ````
 
-O resultado esperado é descrito pelo log a seguir, o buffer é inicializado com 16 posições disponíveis 2 produtores e 2 consumidores, o programa também testará a inserção de 4 items, não contemplada nesse teste
+O resultado esperado é descrito pelo bash a seguir, o buffer é inicializado com 16 posições disponíveis 2 produtores e 2 consumidores, o programa também testará a inserção de 4 items, não contemplada nesse teste
 
-````log
+````bash
 ./bin/test/inicializa.test 16 2 2 4
 Parametros N, P, C, I = 16 2 2 4
 Buffer [ * * * * * * * * * * * * * * * *  ] ( free slots: 16 next free: 0 )
@@ -149,13 +149,13 @@ for (int i = 0; i < P; i++) {pthread_join(prod_thds[i], NULL);}
 ```
 
 Para reproduzir o teste utilize o comando:
-````log
+````bash
 make produz.test PARAMS="16 2 2 4"
 ````
 
-O resultado esperado é descrito pelo log a seguir, o buffer é inicializado com 16 posições disponíveis 2 produtores e 2 consumidores, o programa também testará a inserção de 4 items aleatórios pelos 2 produtores, totalizando 8 items nas primeiras posições.
+O resultado esperado é descrito pelo bash a seguir, o buffer é inicializado com 16 posições disponíveis 2 produtores e 2 consumidores, o programa também testará a inserção de 4 items aleatórios pelos 2 produtores, totalizando 8 items nas primeiras posições.
 
-````log
+````bash
 ./bin/test/produz.test 16 2 2 4
 Parametros N, P, C, I = 16 2 2 4
 5372::7998 -> Buffer[ 7998 * * * * * * * * * * * * * * *  ] ( free slots: 15 next free: 1 )
@@ -168,8 +168,8 @@ Parametros N, P, C, I = 16 2 2 4
 5371::2158 -> Buffer[ 7998 7396 4067 5332 7470 5418 2158 2158 * * * * * * * *  ] ( free slots: 8 next free: 8 )
 ````
 
-Cada inserção é caracterizada pelo log:
-````log
+Cada inserção é caracterizada pelo bash:
+````bash
 {thread_id}::{item} -> Buffer[ {item} * * * * * * * * * * * * * * *  ...] ( free slots: N - 1 next free: pos )
 ````
 
@@ -198,14 +198,14 @@ for (int i = 0; i < C; i++) {pthread_join(cons_thds[i], NULL);}
 ```
 
 Para reproduzir o teste utilize o comando:
-````log
+````bash
 make consome.test PARAMS="16 1 2 4"
 ````
 
-O resultado esperado é descrito pelo log a seguir, o buffer é inicializado com 16 posições disponíveis 2 produtores e 2 consumidores, o programa também testará a inserção de 4 items aleatórios pelos 2 produtores, totalizando 8 items nas primeiras posições.
+O resultado esperado é descrito pelo bash a seguir, o buffer é inicializado com 16 posições disponíveis 2 produtores e 2 consumidores, o programa também testará a inserção de 4 items aleatórios pelos 2 produtores, totalizando 8 items nas primeiras posições.
 Cada consumidor lê P * I items e armazena totalizando 10 leituras e retirando P * I posições do buffer.
 
-````log
+````bash
 ./bin/test/consome.test 16 1 2 4
 Parametros N, P, C, I = 16 1 2 4
 Consumer 1 data: [ 100 ] ( free slots: 9 next data: 1 )
@@ -226,27 +226,37 @@ Consumer 0 data: [ 100 200 300 400 ] ( free slots: 13 next data: 4 )
 5879::400 <- Buffer[ *[-1] *[-1] *[-1] *[-1] 500[2] 600[2] 700[2] *[-1] *[-1] *[-1] *[-1] *[-1] *[-1] *[-1] *[-1] *[-1]  ] ( free slots: 13 next free: 7 )
 ````
 
-Cada consumo é caracterizada pelo log:
-````log
+Cada consumo é caracterizada pelo bash:
+````bash
 Consumer {meu_id} data: [ item ... ] ( free slots: 9 next data: 1 )
 {thread_id}::{item} <- Buffer[ {item[0]}[{falta_ler[0]}] {item[1]}[{falta_ler[1]}]  *[-1] *[-1] ] ( free slots: N - 2 next free: pos )
 ````
 Onde *\** caracteriza um slot disponível e *[-1]* siginifica que o contador *falta_ler* não foi inicializado. 
 
 Note que cada Consumidor termina com P * I items armazenados
-````log
+````bash
 ...
 Consumer 1 data: [ 100 200 300 400 ] ( free slots: 11 next data: 4 )
 ...
 Consumer 0 data: [ 100 200 300 400 ] ( free slots: 13 next data: 4 )
 ...
 ````
+Na linha descrita abaixo é possível notar a espera pela liberação do dado em uma determinada posição, enquanto o buffer aguarda o termino do broadcast. Entre colchetes([*falta_ler*]) está discriminado a quantaidade de consumidores a que ainda não realzizaram odado naquela posição. o dado ta teceira posição (*300*) indica que falta *1* consumidor a ler esta posição, enquanto o quarta, quinta, sexta e sétima estão no aguardo de duas leituras, as demais estão desalocadas para depostito de dados pelos produtores.
+````bash
+5880::300 <- Buffer[ *[-1] *[-1] 300[1] 400[2] 500[2] 600[2] 700[2] *[-1] *[-1] *[-1] *[-1] *[-1] *[-1] *[-1] *[-1] *[-1]  ] ( free slots: 11 next free: 7 )
+
+````
 
 ### Teste Geral (OK)
 
-O teste geral une todas as características descritas nos testes acima e as testa, abrindo simultaneamente várias threads de deposito e consumo, por fim finalizando o buffer. O resultado é descrito pelo log:
+Para reproduzir o teste utilize o comando:
+````bash
+make completo.test PARAMS="16 1 2 4"
+````
 
-````log
+O teste geral une todas as características descritas nos testes acima e as testa, abrindo simultaneamente várias threads de deposito e consumo, por fim finalizando o buffer. O resultado é descrito pelo bash:
+
+````bash
 ./bin/test/completo.test 16 2 2 4
 Parametros N, P, C, I = 16 2 2 4
 6568::7998 -> Buffer[ 7998 * * * * * * * * * * * * * * *  ] ( free slots: 15 next free: 1 )
@@ -292,7 +302,7 @@ Consumer 0 data: [ 7998 7396 4067 5332 7470 5418 1909 166 ] ( free slots: 14 nex
 ````
 
 Desta da vez o consumidor 1 terminou com *6* items armazenados. Essa peculiaridade acontenceu pois como as threads de consumo e produção são inicializadas com uma pseudo-aleatoriedade, os produtores inseriram somente 6 items no buffer, tendo somente estes disponíveis para consumo pelos dois consumidores.
-````log
+````bash
 ...
 Consumer 1 data: [ 7998 7396 4067 5332 7470 5418 ] ( free slots: 13 next data: -1 )
 ...
@@ -300,7 +310,7 @@ Consumer 1 data: [ 7998 7396 4067 5332 7470 5418 ] ( free slots: 13 next data: -
 
 Algum tempo depois, mais dois items foram adicionados ao buffer, possibilitando a leitura de um dos consumidores para os P * I items pré-estabelecidos.
 
-````log
+````bash
 ...
 6567::1909 -> Buffer[ * * * 5332 7470 5418 1909 * * * * * * * * *  ] ( free slots: 12 next free: 7 )
 ...
@@ -309,7 +319,7 @@ Algum tempo depois, mais dois items foram adicionados ao buffer, possibilitando 
 ````
 
 Com isso o consumidor 0 termina sua leitura com P * I items armazenados.
-````log
+````bash
 ...
 Consumer 0 data: [ 7998 7396 4067 5332 7470 5418 1909 166 ] ( free slots: 14 next data: -1 )
 ...
